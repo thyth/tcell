@@ -1,4 +1,5 @@
 // Copyright 2016 The TCell Authors
+// Copyright 2017 Daniel Selifonov
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use file except in compliance with the License.
@@ -141,21 +142,24 @@ func Clear(fg, bg Attribute) {
 	}
 }
 
-// InputMode is not used.
+// InputMode is mostly unused.
 type InputMode int
 
-// Unused input modes; here for compatibility.
+// Input modes; mostly here for compatibility.
 const (
-	InputCurrent InputMode = iota
+	InputCurrent InputMode = 1 << iota
 	InputEsc
 	InputAlt
 	InputMouse
 )
 
-// SetInputMode does not do anything in this version.
+// SetInputMode will only enable mouse mode. Otherwise unused.
 func SetInputMode(mode InputMode) InputMode {
-	// We don't do anything else right now
-	return InputEsc
+	// enable mouse mode, if it's requested
+	if mode & InputMouse != 0 {
+		screen.EnableMouse()
+	}
+	return mode
 }
 
 // OutputMode represents an output mode, which determines how colors
@@ -198,6 +202,12 @@ func Sync() error {
 func SetCell(x, y int, ch rune, fg, bg Attribute) {
 	st := mkStyle(fg, bg)
 	screen.SetContent(x, y, ch, nil, st)
+}
+
+// GetCellRune added to complete compatability implementation for gocui
+func GetCellRune(x, y int) (rune) {
+	mainc, _, _, _ := screen.GetContent(x, y)
+	return mainc
 }
 
 // EventType represents the type of event.
@@ -289,15 +299,25 @@ const (
 	KeyEsc        = Key(tcell.KeyEscape)
 	KeyPgdn       = Key(tcell.KeyPgDn)
 	KeyPgup       = Key(tcell.KeyPgUp)
-	MouseLeft     = Key(tcell.KeyF63) // arbitrary assignments
-	MouseRight    = Key(tcell.KeyF62)
-	MouseMiddle   = Key(tcell.KeyF61)
+	MouseLeft     = Key(tcell.Button1) // arbitrary assignments
+	MouseRight    = Key(tcell.Button3)
+	MouseMiddle   = Key(tcell.Button2)
 	KeySpace      = Key(tcell.Key(' '))
+
+	// missing set of termbox keybindings used by gocui
+	KeyCtrlSpace = Key(tcell.KeyCtrlSpace)
+	MouseRelease = Key(tcell.ButtonNone)
+	MouseWheelUp = Key(tcell.WheelUp)
+	MouseWheelDown = Key(tcell.WheelDown)
+	KeyCtrlBackslash = Key(tcell.KeyCtrlBackslash)
+	KeyCtrlLsqBracket = Key(tcell.KeyCtrlLeftSq)
+	KeyCtrlRsqBracket = Key(tcell.KeyCtrlRightSq)
+	KeyCtrlUnderscore = Key(tcell.KeyCtrlUnderscore)
 )
 
 // Modifiers.
 const (
-	ModAlt = Modifier(tcell.ModAlt)
+	ModAlt  = Modifier(tcell.ModAlt)
 )
 
 func makeEvent(tev tcell.Event) Event {
@@ -314,14 +334,30 @@ func makeEvent(tev tcell.Event) Event {
 			ch = tev.Rune()
 			if ch == ' ' {
 				k = tcell.Key(' ')
+				ch = rune(0) // note: termbox clients assume no rune for space
+			} else {
+				k = 0 // note: termbox clients assume no key for runes
 			}
 		}
 		mod := tev.Modifiers()
+		// knock out the Ctrl modifier, since termbox clients use key values merged with Ctrl
+		mod &= ^tcell.ModCtrl
 		return Event{
 			Type: EventKey,
 			Key:  Key(k),
 			Ch:   ch,
 			Mod:  Modifier(mod),
+		}
+	case *tcell.EventMouse:
+		x, y := tev.Position()
+		b := tev.Buttons()
+		mod := tev.Modifiers()
+		return Event{
+			Type: EventMouse,
+			MouseX: x,
+			MouseY: y,
+			Key: Key(b),
+			Mod: Modifier(mod),
 		}
 	default:
 		return Event{Type: EventNone}
