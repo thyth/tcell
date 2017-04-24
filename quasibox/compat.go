@@ -88,6 +88,11 @@ func (qb *Quasibox) Size() (int, int) {
 	return qb.screen.Size()
 }
 
+// SetSize controls resizing of a quasiscreen. This will be a no-op on tscreens.
+func (qb *Quasibox) SetSize(w, h int) {
+	qb.screen.Resize(0, 0, w, h)
+}
+
 // Attribute affects the presentation of characters, such as color, boldness,
 // and so forth.
 type Attribute uint16
