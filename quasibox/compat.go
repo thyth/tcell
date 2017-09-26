@@ -23,7 +23,7 @@ package quasibox
 import (
 	"errors"
 
-	"github.com/gdamore/tcell"
+	"github.com/thyth/tcell"
 	"io"
 )
 

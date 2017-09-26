@@ -42,7 +42,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gdamore/tcell"
+	"github.com/thyth/tcell"
 )
 
 // #include <curses.h>

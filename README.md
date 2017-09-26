@@ -1,4 +1,8 @@
-## tcell
+## tcell (tweaked by Thyth)
+
+This is a modified version of the tcell library scratching some personal itches for creating SSH based command line
+user interfaces. You probably want to use the upstream version instead. The termbox "emulation" is a little more
+complete, however, and someone might find that useful -- but it's really just enough to use gocui.
 
 [![Linux Status](https://img.shields.io/travis/gdamore/tcell.svg?label=linux)](https://travis-ci.org/gdamore/tcell)
 [![Windows Status](https://img.shields.io/appveyor/ci/gdamore/tcell.svg?label=windows)](https://ci.appveyor.com/project/gdamore/tcell)
@@ -106,7 +110,7 @@ far exceeded the capabilities of termbox.
 ## Termbox compatibility 
 
 A compatibility layer for termbox is provided in the compat
-directory.  To use it, try importing "github.com/gdamore/tcell/termbox"
+directory.  To use it, try importing "github.com/thyth/tcell/termbox"
 instead.  Most termbox-go programs will probably work without further
 modification.
 

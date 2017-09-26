@@ -15,7 +15,7 @@
 package views
 
 import (
-	"github.com/gdamore/tcell"
+	"github.com/thyth/tcell"
 )
 
 // Widget is the base object that all onscreen elements implement.
